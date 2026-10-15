@@ -10,7 +10,7 @@ updated).
 
 ### Methods
 
-##### eBird data
+#### eBird data
 
 Data was downloaded from eBird on Oct 7 2026.
 
