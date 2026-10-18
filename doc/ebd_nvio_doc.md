@@ -30,6 +30,8 @@ Some visual exploration we may want to have:
 2) Temporal distribution of points throughout the year (to visualize yearly migration and breeding seasons)
 3) Mapping sampling effort based on number of observers, checklist, effort in km/h, etc.
 
+[This tutorial](https://ebird.github.io/ebird-best-practices/) has several ideas and guidelines on estimating and modeling biological metrics from eBird data.
+
 Step-by-step of analyzing eBird data (largely based on XXX)
 
 > To be completed by Santiago
