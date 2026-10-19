@@ -32,9 +32,14 @@ Some visual exploration we may want to have:
 
 [This tutorial](https://ebird.github.io/ebird-best-practices/) has several ideas and guidelines on estimating and modeling biological metrics from eBird data.
 
-Step-by-step of analyzing eBird data (largely based on XXX)
+Step-by-step of analyzing eBird data (largely based on [Hochachka et al. 2023](https://doi.org/10.1093/ornithology/ukad035)):
 
-> To be completed by Santiago
+1. Filtering data to region of interest: California, Baja California and Baja California Sur
+2. Filter by time: interested in YCNH reports in Southern California from 2000-2026. Also interested in historical records for Baja CA
+3. Filter by checklist effort:
+- Only include complete checklist—gets rid of some of the heterogeneity in observer effort that comes from citizen science data
+- Only include “traveling” checklists, but also check data with “stationary” and data with only “stationary”
+- Consider filtering by checklist duration (e.g. only include checklists with duration < 5 hrs), and traveling length (e.g. observers traveled up to 5 km)
 
 #### Climate data
 
