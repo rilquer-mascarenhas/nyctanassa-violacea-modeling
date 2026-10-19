@@ -23,6 +23,7 @@ Some methodological filters we may want to use:
 3) Effort in km and/or hour
 4) Time of record (keep between 2000-2026)
 5) Records with breeding information
+6) Think about the age of individual recorded (juvenile vs adults). It's important to have information on both, but juveniles are easier to be misidentified (juveniles of different species look alike).
 
 Some visual exploration we may want to have:
 
