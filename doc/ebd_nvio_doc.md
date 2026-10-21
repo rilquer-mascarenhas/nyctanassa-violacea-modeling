@@ -45,6 +45,7 @@ Step-by-step of analyzing eBird data (largely based on [Hochachka et al. 2023](h
 #### Environmental predictors
 
 - Interesting datasets:
+  - [MODIS](https://lpdaac.usgs.gov/products/mcd12q1v006/)
   - [PRISM](https://prism.oregonstate.edu/)
   - [EarthEnv](https://www.earthenv.org/)
   - [GISA](https://gee-community-catalog.org/projects/gisa/) (Global Impervious Surface Area)
