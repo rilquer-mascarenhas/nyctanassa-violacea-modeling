@@ -42,18 +42,13 @@ Step-by-step of analyzing eBird data (largely based on [Hochachka et al. 2023](h
 - Only include “traveling” checklists, but also check data with “stationary” and data with only “stationary”
 - Consider filtering by checklist duration (e.g. only include checklists with duration < 5 hrs), and traveling length (e.g. observers traveled up to 5 km)
 
-#### Climate data
+#### Environmental predictors
 
-- We are thinking here of checking what is available from remote sensing data, to have a better sense of climate change over recent years.
-- [PRISM](https://prism.oregonstate.edu/) could be an interesting dataset.
-
-#### Land use/urban development
-
-- Two interesting datasets here: [GISA](https://gee-community-catalog.org/projects/gisa/) (Global Impervious Surface Area) and [GUE](https://gee-community-catalog.org/projects/gue/) (Global Urban Extent).
-
-#### Resource availability
-
-- Fisheries? A good contact here might be the [Fredston Lab](https://alexafredston.com/).
+- Interesting datasets:
+  - [PRISM](https://prism.oregonstate.edu/)
+  - [EarthEnv](https://www.earthenv.org/)
+  - [GISA](https://gee-community-catalog.org/projects/gisa/) (Global Impervious Surface Area)
+  - [GUE](https://gee-community-catalog.org/projects/gue/) (Global Urban Extent)
 
 #### Statistical approach
 
