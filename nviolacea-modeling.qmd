@@ -1,0 +1,56 @@
+---
+title: "Modeling of Nyctanassa violacea using eBird data"
+format: html
+editor: visual
+---
+
+## Intro
+
+This document goes over the steps to prepare and model *Nyctanassa violacea* eBird data, largely based on the tutorial provided by [Strimas-Mackey et al. (2023)](https://ebird.github.io/ebird-best-practices/).
+
+The code below checks and install required packages as needed:
+
+```{r eval=F,echo=F,message=FALSE,warning=FALSE}
+pkgs <- c('tidyverse','rnaturalerthdata','terra','auk')
+  
+for (i in pkgs){
+  if (!(requireNamespace(pkg,quietly = TRUE))){
+    install.packages(pkg)
+  }
+}
+```
+
+## eBird data
+
+First step is to import eBird data into R. Data comes in two formats: observations (i.e., each row is one observation for that species) and checklists (i.e., each row is an checklist for which that species was observed). Both will be used throughout this document to estimate final metrics reflecting species presence and abundance.
+
+We will use `auk` functions `read_ebd()` and `read_sampling()` to import observations and checklists, respectively:
+
+```{r eval=F,echo=F,message=FALSE,warning=FALSE}
+observations <- read_ebd('data/')
+
+samp_filt <- samp %>%
+  filter(all_species_reported,
+         between(year(observation_date), 2000, 2025),
+         observation_type %in% c("Stationary", "Traveling"),
+         duration_minutes <= 360,
+         effort_distance_km <= 10,
+         number_observers <= 10)
+```
+
+
+
+Read data for all three states using auk
+Merge data
+Filter to complete lists only
+Zero filling
+Further filters:
+- Account for variation in effort - filtering to specific values
+
+Exploration of final filtered data:
+--Breeding information
+--Individual age
+--Temporal distribution of points over years (2000-2026)
+--Temporal distribution of points throughout the year (to visualize yearly migration and breeding seasons)
+--Mapping sampling effort based on number of observers, checklist, effort in km/h, etc.
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:

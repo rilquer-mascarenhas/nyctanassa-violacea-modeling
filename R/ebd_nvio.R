@@ -9,9 +9,10 @@ require(auk)
 # Read data for all three states using auk
 # Merge data
 # Filter to complete lists only
+# Only after 2000
+# Account for variation in effort - filtering to specific values
 # Zero filling
-# Further filters:
-## Account for variation in effort - filtering to specific values
+
 # Exploration of final filtered data:
 ## Breeding information
 ## Individual age
