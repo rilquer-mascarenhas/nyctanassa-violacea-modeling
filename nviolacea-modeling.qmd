@@ -22,12 +22,14 @@ for (i in pkgs){
 
 ## eBird data
 
-First step is to import eBird data into R. Data comes in two formats: observations (i.e., each row is one observation for that species) and checklists (i.e., each row is an checklist for which that species was observed). Both will be used throughout this document to estimate final metrics reflecting species presence and abundance.
+First step is to import eBird data into R. Data was downloaded for three states: California, Baja California and Baja California Sur. Data comes in two formats: observations (i.e., each row is one observation for that species) and checklists (i.e., each row is an checklist for which that species was observed). Both will be used throughout this document to estimate final metrics reflecting species presence and abundance.
 
-We will use `auk` functions `read_ebd()` and `read_sampling()` to import observations and checklists, respectively:
+We will use `auk` functions `read_ebd()` and `read_sampling()` to import observations and checklists, respectively. These functions will automatically perform several data checks and format columns for downstream analyses.
+
+> Note: The sampling dataset for California has been loaded and fully filtered separate from this code, since the file was previously too large to be stored on Github. Therefore, steps below will be done for all files except California Sampling Dataset.
 
 ```{r eval=F,echo=F,message=FALSE,warning=FALSE}
-observations <- read_ebd('data/')
+observations <- read_ebd('data/ebd_nyc_vio/')
 
 samp_filt <- samp %>%
   filter(all_species_reported,
@@ -38,19 +40,37 @@ samp_filt <- samp %>%
          number_observers <= 10)
 ```
 
+Perform all filters here: complete list, years (2000-2025), observation type and effort
 
+### Proportion of records
 
-Read data for all three states using auk
-Merge data
-Filter to complete lists only
-Zero filling
-Further filters:
-- Account for variation in effort - filtering to specific values
+First check of the increase in proportion of *N. violacea* records in California
 
-Exploration of final filtered data:
---Breeding information
---Individual age
---Temporal distribution of points over years (2000-2026)
---Temporal distribution of points throughout the year (to visualize yearly migration and breeding seasons)
---Mapping sampling effort based on number of observers, checklist, effort in km/h, etc.
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+- Get data for all lists in California
+- Grid the area and filter only to lists that fall into checklists where *N. violacea* was observed
+- Per year, count raw *N. violacea* lists / raw total lists per grid.
+- Plot average temporal consecutive differences to have an idea of increase/decrease.
+
+### Spatial sub-sampling
+
+Create a grid for all three states and subsample a maximum number of lists per grid.
+This will help correct for the fact that eBird is overall more used in the US
+
+Then merge data from all three states
+
+### Data visualization
+
+Spatial
+-- Mapping raw amount of lists and records
+-- Mapping sampling effort based on number of observers, number of checklists, effort in distance, minutes, etc.
+
+Temporal
+-- Temporal distribution of points over years (2000-2026)
+-- Temporal distribution of points throughout the year (to visualize yearly migration and breeding seasons)
+-- Checking if this temporal distribution changes over space
+
+Additional:
+-- Explore breeding information
+-- Explore the age of individuals recorded
+
+### Zero filling
