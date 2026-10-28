@@ -37,7 +37,8 @@ Step-by-step of analyzing eBird data (largely based on [Hochachka et al. 2023](h
 
 1. Filtering data to region of interest: California, Baja California and Baja California Sur
 2. Filter by time: interested in YCNH reports in Southern California from 2000-2026. Also interested in historical records for Baja CA
-3. Filter by checklist effort:
+3. Use auk_unique() to merge shared checklists to one primary checklist (avoid duplicate reports)
+4. Filter by checklist effort:
 - Only include complete checklist—gets rid of some of the heterogeneity in observer effort that comes from citizen science data
 - Only include “traveling” checklists, but also check data with “stationary” and data with only “stationary”
 - Consider filtering by checklist duration (e.g. only include checklists with duration < 5 hrs), and traveling length (e.g. observers traveled up to 5 km)
