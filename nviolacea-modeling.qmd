@@ -84,7 +84,7 @@ smp_effort_filt <- lapply(smp,function(x){
 
 Let's do a quick plot to visualize our filtered data at this point. We will read shapefiles for state boundaries using functions in the package `sf`, and plot them using `ggplot`.
 
-California shapefile will be imported for the package `rnaturalearthdata`, while shapefile for Mexican states are saved to this repo and will be imported directly from file. 
+California shapefile will be imported for the package `rnaturalearthdata`, while shapefile for Mexican states are saved to this repo and will be imported directly from file.
 
 ```{r message=FALSE,warning=FALSE}
 # California shapefile
@@ -129,9 +129,9 @@ ggplot()+geom_sf(data=states)+
 
 A couple things can be inferred from these plots:
 
-1) Both observation and sampling data seems to be over-represented in California, a bia that needs to be corrected.
+1)  Both observation and sampling data seems to be over-represented in California, a bia that needs to be corrected.
 
-2) Sampling points cover most of the state area (even islands off the coast of the continent), which may not be ideal. We want sampling points to represent the area that is biologically accessible for the species, since they will be used to define absence points (i.e., areas that the species can reach but is absent due to non-suitable conditions). Instead of using state boundaries to define the background, we will use a circle buffer around occurrence points.
+2)  Sampling points cover most of the state area (even islands off the coast of the continent), which may not be ideal. We want sampling points to represent the area that is biologically accessible for the species, since they will be used to define absence points (i.e., areas that the species can reach but is absent due to non-suitable conditions). Instead of using state boundaries to define the background, we will use a circle buffer around occurrence points.
 
 We will perform these two corrections simultaneously in the next section.
 
@@ -294,13 +294,13 @@ write_csv(smp_final,'data/ebd_nyc_vio/smp_fullyfiltered.csv')
 
 ### Data visualization
 
-- Temporal distribution of proportion of records (n records/n total checklist) from 2000-2026 for the three states - overall line graph for each state
+-   Temporal distribution of proportion of records (n records/n total checklist) from 2000-2026 for the three states - overall line graph for each state
 
-- Temporal distribution of proportion of records (n records / n total checklist for that period of the year) throughout the year (to visualize yearly migration and breeding seasons) - overall line graph, months in x, proportion in y, grouped/colored by year (2000-2026), faceted by state
+-   Temporal distribution of proportion of records (n records / n total checklist for that period of the year) throughout the year (to visualize yearly migration and breeding seasons) - overall line graph, months in x, proportion in y, grouped/colored by year (2000-2026), faceted by state
 
-- Mapping proportion of records of *N. violacea* (n records / n total checklist) per spatial grid. A single map across all three states, for all years (2000/2026), add sample size as title. For final figure, probably just plot 2000, 2010, 2020, 2025
+-   Mapping proportion of records of *N. violacea* (n records / n total checklist) per spatial grid. A single map across all three states, for all years (2000/2026), add sample size as title. For final figure, probably just plot 2000, 2010, 2020, 2025
 
-- Mapping sampling effort based on number of observers, number of checklists, effort in distance, minutes, etc.
+-   Mapping sampling effort based on number of observers, number of checklists, effort in distance, minutes, etc.
 
 Additional: -- Explore breeding information -- Explore the age of individuals recorded
 
