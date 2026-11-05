@@ -11,7 +11,13 @@ This document goes over the steps to prepare and model *Nyctanassa violacea* eBi
 The code below checks and install required packages as needed:
 
 ```{r eval=F,message=FALSE,warning=FALSE}
-pkgs <- c('tidyverse','rnaturalerthdata','terra','auk')
+pkgs <- c('tidyverse', # Data wrangling
+          
+          # Spatial
+          'rnaturalerthdata','terra','sf',
+          
+          # eBird data
+          'auk')
 
 for (pkg in pkgs){
   if (!(requireNamespace(pkg,quietly = TRUE))){
@@ -35,8 +41,8 @@ obs_files <- list.files('data/ebd_nyc_vio/',pattern = '2026.txt$',full.names = T
 smp_files <- list.files('data/ebd_nyc_vio/',pattern = '2026_sampling.txt$',full.names = T)
 
 # Reading using `lapply` to go through all files
-obs <- lapply(obs_files,read_ebd)
-smp <- lapply(smp_files,read_sampling)
+obs <- lapply(obs_files,auk::read_ebd)
+smp <- lapply(smp_files,auk::read_sampling)
 ```
 
 ### Quality filters
@@ -76,6 +82,59 @@ smp_effort_filt <- lapply(smp,function(x){
   bind_rows(read_delim('data/ebd_nyc_vio/ebd_CA_samp_filt.txt'))
 ```
 
+Let's do a quick plot to visualize our filtered data at this point. We will read shapefiles for state boundaries using functions in the package `sf`, and plot them using `ggplot`.
+
+California shapefile will be imported for the package `rnaturalearthdata`, while shapefile for Mexican states are saved to this repo and will be imported directly from file. 
+
+```{r message=FALSE,warning=FALSE}
+# California shapefile
+states <- rnaturalearthdata::states50 %>% filter(name=='California') %>% 
+  # Immediately add Mexican states from file
+  bind_rows(read_sf('data/spatial/mexican-states/mexican-states.shp') %>%
+              # We first filter Mexican states to only Baja California and BC Sur
+              filter(grepl('Baja',name)))
+```
+
+Plotting sampling points:
+
+> We will randomly subsample sampling points, since they are many, to make plotting easier and faster
+
+```{r message=FALSE,warning=FALSE}
+ggplot()+geom_sf(data=states)+
+  geom_point(data=smp_effort_filt %>% slice_sample(prop = 0.1),
+             aes(x=longitude,y=latitude),
+             alpha=0.4,pch=21,size=2,color='grey',fill='brown')+
+  theme(panel.grid.major = element_line(color = gray(.9),linetype = "dashed", linewidth = 0),
+        panel.background = element_rect(fill = "ghostwhite"),
+        axis.title = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text = element_blank(),
+        legend.position = 'none')
+```
+
+Plotting observation points:
+
+```{r message=FALSE,warning=FALSE}
+ggplot()+geom_sf(data=states)+
+  geom_point(data=obs_effort_filt,
+             aes(x=longitude,y=latitude),
+             alpha=0.4,pch=21,size=2,fill='lightblue')+
+  theme(panel.grid.major = element_line(color = gray(.9),linetype = "dashed", linewidth = 0),
+        panel.background = element_rect(fill = "ghostwhite"),
+        axis.title = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text = element_blank(),
+        legend.position = 'none')
+```
+
+A couple things can be inferred from these plots:
+
+1) Both observation and sampling data seems to be over-represented in California, a bia that needs to be corrected.
+
+2) Sampling points cover most of the state area (even islands off the coast of the continent), which may not be ideal. We want sampling points to represent the area that is biologically accessible for the species, since they will be used to define absence points (i.e., areas that the species can reach but is absent due to non-suitable conditions). Instead of using state boundaries to define the background, we will use a circle buffer around occurrence points.
+
+We will perform these two corrections simultaneously in the next section.
+
 ### Spatial sub-sampling
 
 Since California has many more checklists than both Baja California and Baja California Sur, we will perform a spatial subsampling of all checklists in the dataset. This filtering will include: 1) setting up a background area for our species and keeping only lists within that area; 2) performing spatial thinning on checklists, only enough to normalize sampling effort across space (we don't want to remove too many checklists since they consist of our "absence" sampling); 3) remove filtered-out lists also from our observations dataset, to make sure this dataset is also subsampled spatially.
@@ -92,6 +151,22 @@ bkg <- st_as_sf(obs_effort_filt %>% slice_sample(prop=0.1), # Retrieving 10% of 
            crs = "EPSG:4326") %>%
   st_buffer(dist=200000) %>%  # Setting to a distance of 200k meters (i.e., 200 km)
   st_union()
+```
+
+Plotting for visualization over occurence points:
+
+```{r message=FALSE,warning=FALSE}
+ggplot()+geom_sf(data=states)+
+  geom_sf(data=bkg,fill='lightpink',alpha=0.4)+
+  geom_point(data=obs_effort_filt,
+           aes(x=longitude,y=latitude),
+           alpha=0.4,pch=21,size=2,fill='lightblue')+
+  theme(panel.grid.major = element_line(color = gray(.9),linetype = "dashed", linewidth = 0),
+        panel.background = element_rect(fill = "ghostwhite"),
+        axis.title = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text = element_blank(),
+        legend.position = 'none')
 ```
 
 Now, we will remove checklists outside of our background area. We will do so by 1) creating a raster around the study region; 2) masking that raster based on the background polygon; 3) checking with checklists fall outside that background (i.e., which checklists return no data when checked against the masked raster).
@@ -124,16 +199,16 @@ smp_bkgfilt <- smp_effort_filt %>%
 
 Checking the median value for number of checklists per cell in states:
 
-```{r eval=F,message=FALSE,warning=FALSE}
+```{r message=FALSE,warning=FALSE}
 smp_bkgfilt %>% 
-  summarize(total=n(),.by='state')
-
- smp_bkgfilt %>%
-  summarize(n=n(),.by=c('state','cell')) %>% 
-  summarize(median_per_cell=median(n),.by='state')
+  summarize(total=n(),.by='state') %>%
+  left_join(smp_bkgfilt %>%
+              summarize(n=n(),.by=c('state','cell')) %>%
+              summarize(median_per_cell=median(n),.by='state'),
+            by='state')
 ```
 
-California has many more checklists (3 million) than Mexican states (around 20 thousand). Similarly, California has many more checklists per cell (median = 5651) than Mexican states (median = 53 to 114). This is the spatial sampling effort bias we want to correct. Here, we will keep all lists in Mexican states, but reduce the number of lists per cell in California to a value similar to the value per cell in Mexican states. To do so, we will calculate the average per cell between the two Mexican states and randomly sample an amount around that average per cell in California.
+California has many more checklists (3 million) than Mexican states (around 20 thousand). Similarly, California has many more checklists per cell than Mexican states. This is the spatial sampling effort bias we want to correct. Here, we will keep all lists in Mexican states, but reduce the number of lists per cell in California to a value similar to the value per cell in Mexican states. To do so, we will calculate the average per cell between the two Mexican states and randomly sample an amount around that average per cell in California.
 
 ```{r eval=F,message=FALSE,warning=FALSE}
 # Getting the average value
@@ -152,14 +227,18 @@ CA_spatsampled <- smp_bkgfilt %>% filter(state=='California') %>%
 # and adding filter chekclists
 smp_final <- smp_bkgfilt %>% filter(state!='California') %>%
   bind_rows(CA_spatsampled)
+```
 
+Checking again median values for number of checklists per cell in states:
+
+```{r message=FALSE,warning=FALSE}
 # Checking median values of checklist per cell
 smp_final %>% 
-  summarize(total=n(),.by='state')
-
-smp_final %>%
-  summarize(n=n(),.by=c('state','cell')) %>% 
-  summarize(median_per_cell=median(n),.by='state')
+  summarize(total=n(),.by='state') %>%
+  left_join(smp_final %>%
+              summarize(n=n(),.by=c('state','cell')) %>%
+              summarize(median_per_cell=median(n),.by='state'),
+            by='state')
 ```
 
 California now has the fewest number of checklists, which matches the expectation based on how our study area covers these three states: California's territory is less represented in our background polygon, since the species is not as prevalent up there, therefore we end up with proportionally fewer checklists there.
@@ -169,6 +248,41 @@ Now let's make sure to remove from the observations dataset the same checklists 
 ```{r eval=F,message=FALSE,warning=FALSE}
 obs_final <- obs_effort_filt %>%
   filter(checklist_id %in% (smp_final$checklist_id))
+```
+
+Maps to visualize our final dataset
+
+Sampling points:
+
+```{r message=FALSE,warning=FALSE}
+ggplot()+geom_sf(data=states)+
+  geom_point(data=smp_final,
+             aes(x=longitude,y=latitude),
+             alpha=0.4,pch=21,size=2,color='grey',fill='brown')+
+  #geom_point(data=obs_final,
+  #           aes(x=longitude,y=latitude),
+  #           alpha=0.4,pch=21,size=2,fill='lightblue')+
+  theme(panel.grid.major = element_line(color = gray(.9),linetype = "dashed", linewidth = 0),
+        panel.background = element_rect(fill = "ghostwhite"),
+        axis.title = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text = element_blank(),
+        legend.position = 'none')
+```
+
+Observation points:
+
+```{r message=FALSE,warning=FALSE}
+ggplot()+geom_sf(data=states)+
+  geom_point(data=obs_final,
+             aes(x=longitude,y=latitude),
+             alpha=0.4,pch=21,size=2,fill='lightblue')+
+  theme(panel.grid.major = element_line(color = gray(.9),linetype = "dashed", linewidth = 0),
+        panel.background = element_rect(fill = "ghostwhite"),
+        axis.title = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text = element_blank(),
+        legend.position = 'none')
 ```
 
 Saving final fully filtered datasets:
