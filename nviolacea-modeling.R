@@ -62,7 +62,7 @@ smp_effort_filt <- lapply(smp,function(x){
 # Mapping####
 states <- rnaturalearthdata::states50 %>% filter(name=='California') %>% 
   # Immediately add Mexican states from file
-  bind_rows(read_sf('data/spatial/mexican-states/mexican-states.shp') %>%
+  bind_rows(read_sf('data/spatial/mexican_states/mexican-states.shp') %>%
               # We first filter Mexican states to only Baja California and BC Sur
               filter(grepl('Baja',name)))
 
@@ -103,6 +103,9 @@ ggplot()+geom_sf(data=states)+
         axis.ticks = element_blank(),
         axis.text = element_blank(),
         legend.position = 'none')
+
+# Save the background
+write_sf(bkg,'data/spatial/background/bkg.shp')
 
 # Empty raster and masking
 r <- rast(
