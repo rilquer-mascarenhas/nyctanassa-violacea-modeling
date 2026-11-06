@@ -23,7 +23,7 @@ for (pkg in pkgs){
   if (!(requireNamespace(pkg,quietly = TRUE))){
     install.packages(pkg)
   }
-  require(pkg)
+  library(pkg)
 }
 ```
 
@@ -95,7 +95,7 @@ states <- rnaturalearthdata::states50 %>% filter(name=='California') %>%
               filter(grepl('Baja',name)))
 ```
 
-Plotting sampling points:
+Plotting:
 
 > We will randomly subsample sampling points, since they are many, to make plotting easier and faster
 
@@ -104,18 +104,6 @@ ggplot()+geom_sf(data=states)+
   geom_point(data=smp_effort_filt %>% slice_sample(prop = 0.1),
              aes(x=longitude,y=latitude),
              alpha=0.4,pch=21,size=2,color='grey',fill='brown')+
-  theme(panel.grid.major = element_line(color = gray(.9),linetype = "dashed", linewidth = 0),
-        panel.background = element_rect(fill = "ghostwhite"),
-        axis.title = element_blank(),
-        axis.ticks = element_blank(),
-        axis.text = element_blank(),
-        legend.position = 'none')
-```
-
-Plotting observation points:
-
-```{r message=FALSE,warning=FALSE}
-ggplot()+geom_sf(data=states)+
   geom_point(data=obs_effort_filt,
              aes(x=longitude,y=latitude),
              alpha=0.4,pch=21,size=2,fill='lightblue')+
@@ -127,7 +115,7 @@ ggplot()+geom_sf(data=states)+
         legend.position = 'none')
 ```
 
-A couple things can be inferred from these plots:
+A couple things can be inferred from this plot:
 
 1)  Both observation and sampling data seems to be over-represented in California, a bia that needs to be corrected.
 
