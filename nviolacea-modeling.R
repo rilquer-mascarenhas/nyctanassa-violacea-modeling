@@ -272,3 +272,43 @@ obs_final %>%
 # Exporting
 write_csv(obs_final,'data/ebd_nyc_vio/obs_fullyfiltered.csv')
 write_csv(smp_final,'data/ebd_nyc_vio/smp_fullyfiltered.csv')
+
+# Plotting number of nyc_vio observations per checklist for California temporally
+
+#converting obs_count into numeric value so y-axis is in order
+obs_final$observation_count <- as.numeric(as.character(obs_final$observation_count))
+
+#averaging observation counts for each date 
+obsav_graph <- obs_final %>%
+  group_by(observation_date) %>%
+  summarise(observation_count = mean(observation_count, na.rm = TRUE), .groups = "drop")
+
+#graphing
+ggplot(obsav_graph, aes(x = observation_date, y = observation_count)) + 
+  geom_point() +
+  geom_smooth(aes(group = 1)) +
+  labs(x = "Observation Date", y = NULL) +
+  theme_minimal()
+
+# Plotting number of checklists with nyc_vio observations for California temporally
+
+obs_final_count <- obs_final %>%
+  count(observation_date)
+ggplot(obs_final_count, aes(x = observation_date, y = n)) +
+  geom_point(size = 2) + 
+  geom_smooth(method = "lm") +
+  labs(x = "observation date", y = "number of checklists with nyc_vio") +
+  theme_minimal()
+
+# figuring out how to average number of checklists fail
+
+obs_final_count <- obs_final %>%
+  count(observation_date, name = "n")
+obs_final_count$n <- as.numeric(obs_final_count$n)
+avg_count <- mean(obs_final_count$n, na.rm = TRUE)
+ggplot(obs_final_count, aes(x = observation_date, y = n)) +
+  geom_point(size = 2) + 
+  geom_smooth(method = "lm") +
+  labs(x = "observation date", y = "number of checklists with nyc_vio") +
+  theme_minimal()
+  
