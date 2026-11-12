@@ -273,42 +273,34 @@ obs_final %>%
 write_csv(obs_final,'data/ebd_nyc_vio/obs_fullyfiltered.csv')
 write_csv(smp_final,'data/ebd_nyc_vio/smp_fullyfiltered.csv')
 
-# Plotting number of nyc_vio observations per checklist for California temporally
 
-#converting obs_count into numeric value so y-axis is in order
-obs_final$observation_count <- as.numeric(as.character(obs_final$observation_count))
+# Data visualization####
 
-#averaging observation counts for each date 
-obsav_graph <- obs_final %>%
-  group_by(observation_date) %>%
-  summarise(observation_count = mean(observation_count, na.rm = TRUE), .groups = "drop")
+obs_final <- read_csv('data/ebd_nyc_vio/obs_fullyfiltered.csv')
+smp_final <- read_csv('data/ebd_nyc_vio/smp_fullyfiltered.csv')
 
-#graphing
-ggplot(obsav_graph, aes(x = observation_date, y = observation_count)) + 
-  geom_point() +
-  geom_smooth(aes(group = 1)) +
-  labs(x = "Observation Date", y = NULL) +
-  theme_minimal()
+## Trend 2000-2026####
 
-# Plotting number of checklists with nyc_vio observations for California temporally
+# Temporal distribution of proportion of records (n records/n total checklist) from
+# 2000-2026 for the three states - overall line graph for each state
 
-obs_final_count <- obs_final %>%
-  count(observation_date)
-ggplot(obs_final_count, aes(x = observation_date, y = n)) +
-  geom_point(size = 2) + 
-  geom_smooth(method = "lm") +
-  labs(x = "observation date", y = "number of checklists with nyc_vio") +
-  theme_minimal()
-
-# figuring out how to average number of checklists fail
-
-obs_final_count <- obs_final %>%
-  count(observation_date, name = "n")
-obs_final_count$n <- as.numeric(obs_final_count$n)
-avg_count <- mean(obs_final_count$n, na.rm = TRUE)
-ggplot(obs_final_count, aes(x = observation_date, y = n)) +
-  geom_point(size = 2) + 
-  geom_smooth(method = "lm") +
-  labs(x = "observation date", y = "number of checklists with nyc_vio") +
-  theme_minimal()
-  
+# Grouping by month and using boxplots
+obs_final %>% 
+  mutate(year = year(observation_date), # Adding a column that is the year of the observation date
+         month = month(observation_date)) %>% # Adding a column that is the month of observation date
+  # Here, we are creating a label that has year and month so we can use theh function ym() to convert
+  # to the date format. We do that because date format is easier for ggplot to interpret temporally, and plot
+  # the order correctly. We also do this because ggplot requires only one column for each axis (i.e, we cannot
+  # make a plot using both columns year and month created in the previous line).
+  mutate(year_month = ym(paste0(year,' ',month))) %>%
+  mutate(state = factor(state,levels=c('Baja California Sur','Baja California','California'))) %>% 
+  # We feed that table to the ggplot function, use geom_boxplot(), and group by year_month
+  ggplot(aes(x=year_month,y=observation_count,group=year_month,fill=month))+
+  geom_boxplot()+
+  facet_wrap(~state,ncol=1,scales='free')+
+  scale_fill_gradient2(
+    low = "#253494",      # Color for low values
+    mid = "#d95f0e",     # Color for the middle value
+    high = "#253494",      # Color for high values
+    midpoint = 6       # Value where the 'mid' color is centered
+  )
